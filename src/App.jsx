@@ -30,10 +30,6 @@ function App() {
           const res = await solana.connect({onlyIfTrusted: true})
           console.log('connected with publicKey', res.publicKey.toBase58())
           setWalletAddress(res.publicKey.toBase58())
-          await Retrieve()
-          if (retrieveValue == null){
-            await CreateAccount()
-          }
         } 
       } else {
         alert('wallet not found')
@@ -105,9 +101,11 @@ const CreateAccount = async () => {
         signer: [provider.wallet.publicKey], // Correctly passing the keypair
       });
       console.log('Created new myAccount w/ address:', provider.wallet.publicKey.toBase58());
+      
     } else {
       const account = await program.account.init.fetch(pda);
       console.log('Retrieved existing account data:', account);
+      await Retrieve()
     }
   } catch (error) {
     console.log('ERROR IN CREATING/INITIALIZING ACCOUNT', error);
@@ -168,6 +166,7 @@ const UpdateValue = async () =>{
             onChange={onInputChange}
             ></input>
             <br></br>
+            <button className="btn2" onClick={CreateAccount}>Initialize</button>
             <button className="btn2" onClick={UpdateValue}>Store</button>
           </div>
           {/*get value column two */}
