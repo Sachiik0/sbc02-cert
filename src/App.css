@@ -29,34 +29,28 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.btn {
+.btn,
+.btn2 {
   background-color: #333;
   color: #fff;
   border: none;
-  padding: 10px 20px;
+  flex: 1; 
+  min-width: 200px; 
+  height: 40px;
   border-radius: 5px;
   cursor: pointer;
 }
 
 .btn2 {
   background-color: #444;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
   margin-top: 10px;
-}
-
-.address {
-  font-weight: bold;
 }
 
 .grid-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: auto;
   width: 100%;
 }
 
@@ -67,4 +61,8 @@ input {
   width: 100%;
   max-width: 300px;
   box-sizing: border-box;
+}
+
+.address {
+  color: #fffefe;
 }
