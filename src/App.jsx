@@ -180,7 +180,7 @@ const UpdateValue = async () =>{
             </p>
             <div className="grid-item">
               <button className='btn2' onClick={CreateAccount}>Initialize</button>
-             <button className='btn2' onClick={disconnectWallet}>Disconnect Wallet</button>
+              <button className='btn2' onClick={disconnectWallet}>Disconnect Wallet</button>
             </div>
           </div>
         )}
@@ -193,9 +193,9 @@ const UpdateValue = async () =>{
           
           <div className="grid-item">
             <p>{retrieveValue}</p>
-            <input placeholder="value" value = {inputValue} onChange={onInputChange}></input>
-            <button className="btn2" onClick={Retrieve}>Retrieve</button>
+            <input placeholder="Can you write some for me?" value = {inputValue} onChange={onInputChange}></input>
             <button className="btn2" onClick={UpdateValue}>Store</button>
+            <button className="btn2" onClick={Retrieve}>Retrieve</button>
             <button className='btn2' onClick={disconnectWallet}>Disconnect Wallet</button>
             </div>
           
