@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 import * as anchor from '@project-serum/anchor'
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
@@ -21,32 +21,47 @@ function App() {
   const [walletAddress, setWalletAddress] = useState(null)
   const [retrieveValue, setRetrieveValue] = useState(null)
   const [inputValue, setInputValue] = useState(' ')
-  window.onload = async function () {
-    try{
-      if(window.solana){
-        const solana = window.solana
-        if(solana.isPhantom){
-          console.log('phantom wallet found')
-          const res = await solana.connect({onlyIfTrusted: true})
-          console.log('connected with publicKey', res.publicKey.toBase58())
-          setWalletAddress(res.publicKey.toBase58())
-        } 
+  const [isConnected, setIsConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    checkWalletConnection();
+  }, [])
+  
+const checkWalletConnection = async () => {
+    try {
+      if (window.solana) {
+        const solana = window.solana;
+        if (solana.isPhantom) {
+          console.log('Phantom wallet found');
+          const res = await solana.connect({ onlyIfTrusted: true });
+          console.log('Connected with publicKey', res.publicKey.toBase58());
+          setWalletAddress(res.publicKey.toBase58());
+          setIsConnected(true);
+        }
       } else {
-        alert('wallet not found')
+        alert('Wallet not found');
       }
-    }catch(error){
-        console.log(error)
+    } catch (error) {
+      console.log(error);
     }
 }
 
-const connectWallet = async () => {
-  if (window.solana){
-    const solana = window.solana
-    const res = await solana.connect()
-    setWalletAddress(res.publicKey.toBase58())
-  } else {
-    alert('wallet not found')
-  }
+const disconnectWallet = async () => {
+    try {
+      if (window.solana) {
+        const solana = window.solana;
+        await solana.disconnect();
+        setIsConnected(false); // Set isConnected state to false
+        setIsInitialized(false);
+        setWalletAddress(null);
+        console.log('Wallet disconnected');
+      } else {
+        alert('Wallet not found');
+      }
+    } catch (error) {
+      console.log(error);
+    }
 }
 
 const getProvider = () =>{
@@ -94,24 +109,29 @@ const CreateAccount = async () => {
     if (pdaAccount === null) {
       let tx = await program.rpc.initialize({
         accounts: {
-          initialAccount: pda, // Using PDA as the account
+          initialAccount: pda,
           user: provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
         },
-        signer: [provider.wallet.publicKey], // Correctly passing the keypair
+        signer: [provider.wallet.publicKey],
       });
-      console.log('Created new myAccount w/ address:', provider.wallet.publicKey.toBase58());
-      
+      console.log(
+        'Created new myAccount w/ address:',
+        provider.wallet.publicKey.toBase58()
+      );
+      setIsInitialized(true); // Set initialization state to true
     } else {
       const account = await program.account.init.fetch(pda);
       console.log('Retrieved existing account data:', account);
-      await Retrieve()
+      await Retrieve();
+      setIsInitialized(true); // Set initialization state to true
     }
   } catch (error) {
     console.log('ERROR IN CREATING/INITIALIZING ACCOUNT', error);
     setRetrieveValue(null);
   }
-};
+}
+
 
 const onInputChange = (event) =>{
   const {value}= event.target
@@ -145,38 +165,41 @@ const UpdateValue = async () =>{
   return (
     <div className="App">
       <header className="App-header">
-        {!walletAddress && (
+        {!isConnected && (
         <div>
-          <button className='btn' onClick={connectWallet}>
+          <button className='btn' onClick={checkWalletConnection}>
             Connect Wallet
           </button>
         </div>
         )}
-        {walletAddress && (
+        {isConnected && !isInitialized && (
+          <div>
+            <p>
+              Connected Account :{' '}
+              <span className='address'>{walletAddress}</span>
+            </p>
+            <div className="grid-item">
+              <button className='btn2' onClick={CreateAccount}>Initialize</button>
+             <button className='btn2' onClick={disconnectWallet}>Disconnect Wallet</button>
+            </div>
+          </div>
+        )}
+        {isInitialized && (
         <div>
           <p>
             Connected Account :{' '}
             <span className='address'>{walletAddress}</span>
           </p>
+          
           <div className="grid-item">
-            {/*set value column one */}
-            <input
-            placeholder="value"
-            value = {inputValue}
-            onChange={onInputChange}
-            ></input>
-            <br></br>
-            <button className="btn2" onClick={CreateAccount}>Initialize</button>
-            <button className="btn2" onClick={UpdateValue}>Store</button>
-          </div>
-          {/*get value column two */}
-          <div className="grid-item">
-            <button className="btn2" onClick={Retrieve}>
-              Retrieve
-            </button>
             <p>{retrieveValue}</p>
-            
-          </div>
+            <input placeholder="value" value = {inputValue} onChange={onInputChange}></input>
+            <button className="btn2" onClick={Retrieve}>Retrieve</button>
+            <button className="btn2" onClick={UpdateValue}>Store</button>
+            <button className='btn2' onClick={disconnectWallet}>Disconnect Wallet</button>
+            </div>
+          
+
         </div>
       )}
       </header>
